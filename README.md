@@ -7,7 +7,7 @@
     ```
 2. Iniciar proyecto
    ```bash
-   npm start
+   npm run dev 
    ```
 
 ## Creador de esta gran API
