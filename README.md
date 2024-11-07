@@ -5,7 +5,7 @@
     ``` bash
     npm install
     ```
-2. Iniciar proyecto
+2. Iniciar API
    ```bash
    npm run dev 
    ```
