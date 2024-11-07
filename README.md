@@ -10,7 +10,7 @@
    npm start
    ```
 
-## Contribuyentes de esta gran aplicacion
+## Creador de esta gran API
 
 
 ![Contribuyentes](https://contrib.rocks/image?repo=Marcos-Ortega/API---Trabajo-Final)
