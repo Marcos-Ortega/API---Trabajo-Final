@@ -5,11 +5,7 @@
     ``` bash
     npm install
     ```
-2. Instalar alertas
-   ```bash
-   npm install sweetalert2
-   ```
-3. Iniciar proyecto
+2. Iniciar proyecto
    ```bash
    npm start
    ```
