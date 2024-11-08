@@ -1,46 +1,51 @@
-const express = require('express');
-const fs = require('fs');
+const express = require('express');//importar express
+const fs = require('fs');//importar fs para leer y escribr archivos
 const bodyParser = require('body-parser');
 const bodyP = bodyParser.json();
-const app = express();
+const app = express();//Inicializamos al app con express
 app.use(bodyP);
-const port = 3000;
+const port = 3000;//Definir el puerto donde va a correr el sv.
 
+//Leer datos de un json
 const leerDatos = () => {
     try {
-        const datos = fs.readFileSync("./datos.json");
-        return JSON.parse(datos);
+        const datos = fs.readFileSync("./datos.json"); //leer el archivo datos.json 
+        return JSON.parse(datos);//convierte los datos en formato json y los retorna
     } catch (error) {
-        console.log(error);
+        console.log(error);//si hay algun error al leer datos los muestra en la consola
     }
 };
 
+//Escribir datos en un json
 const escribir = (datos) => {
     try {
-        fs.writeFileSync("./datos.json", JSON.stringify(datos));
+        fs.writeFileSync("./datos.json", JSON.stringify(datos)); //escrbie los datos en formato JSON, en el archivo datos.json
     } catch (error) {
-        console.log(error);
+        console.log(error);//si hay algun error al escribir datos los muestra en la consola
     }
 };
+
+//Ruta principal
 app.get('/', (req, res) => {
-    res.send("API COMPLETAMENTE 🍾🍾🍾 ESPUMANTE 🍾🍾🍾PARA UNA DE LAS MEJORES MATERIAS DE TODA LA E.P.E.T N20 - API TRABAJO FINAL");
+    res.send("🍾 API TRABAJO FINAL 🍾");
 });
+
 //-------------------CURSOS-----------------------
 //Listar todos los cursos
-app.get('/ListarCursos', (req, res) => {
-    const datos = leerDatos();
-    res.json(datos.cursos);
+app.get('/ListarCursos', (req, res) => { //endpoint para listar todos los cursos
+    const datos = leerDatos();//lee los datos del archivo json
+    res.json(datos.cursos);//devuelve la lista de cursos
 });
 
 //Buscar curso por ID
 app.get('/BuscarCurso/:id', (req, res) => {
     const datos = leerDatos();
     const id = parseInt(req.params.id);// recupera el id puesto por parametro
-    const curso = datos.cursos.find((curso) => curso.idCurso === id);
+    const curso = datos.cursos.find((curso) => curso.idCurso === id); //busca el id del curso en la lista
     if (curso) {
-        res.json(curso);
+        res.json(curso);//si encuentra el curso lo devuelve 
     } else {
-        res.status(404).send("Curso no encontrado.");
+        res.status(404).send("Curso no encontrado."); //si no lo encuentra muestra este mensaje
     }
 });
 
@@ -49,36 +54,36 @@ app.post('/SubirCurso', (req, res) => {
     const datos = leerDatos();
     let cursos = datos.cursos;
     let nuevoCursoId;
-    if (cursos.length > 0) {
-        nuevoCursoId = cursos[cursos.length - 1].idCurso + 1;
+    if (cursos.length > 0) { //comprueba si hay cursos
+        nuevoCursoId = cursos[cursos.length - 1].idCurso + 1; //si hay cursos se le genera un ID 
     }
-    else {
-        nuevoCursoId = 1;
+    else { //si no hay cursos
+        nuevoCursoId = 1; //se le da el id 1 al primer curso
     }
-    const body = req.body;
-    const nuevoCurso = {
+    const body = req.body; //recupera el cuerpo de la solicitud
+    const nuevoCurso = { //se crea el nuevo curso con los datos del body y algunos valores predetermiandos.
         idCurso: nuevoCursoId,
         ...body,
         cantidadAlumnos: 0,
         cantidadModulos: 0,
     };
-    datos.cursos.push(nuevoCurso);
-    escribir(datos);
-    res.json(nuevoCurso);
+    datos.cursos.push(nuevoCurso);//agrega el nuevo curso a la lista
+    escribir(datos); //escribe los nuevos datos en el archivo
+    res.json(nuevoCurso); //muestra el curso creado
 });
 
 //Actualizar curso
 app.put('/ActualizarCurso/:id', (req, res) => {
     const datos = leerDatos();
-    const body = req.body;
+    const body = req.body;//recupera el cuerpo de la solicitud
     const id = parseInt(req.params.id);// recupera el id puesto por parametro
-    const buscarIndex = datos.cursos.findIndex((curso) => curso.idCurso === id);
-    datos.cursos[buscarIndex] = {
+    const buscarIndex = datos.cursos.findIndex((curso) => curso.idCurso === id); //busca el id del curso en la lista
+    datos.cursos[buscarIndex] = {//actualiza el curso con los nuevos datos
         ...datos.cursos[buscarIndex],
         ...body,
     };
-    escribir(datos);
-    res.json({ message: "Curso actualizado" });
+    escribir(datos);//escribe los nuevos datos en el archivo
+    res.json({ message: "Curso actualizado" }); //muestra un msj 
 });
 
 //Cambiar estado del curso
@@ -87,18 +92,18 @@ app.delete('/EstadoCurso/:id', (req, res) => {
     const id = parseInt(req.params.id);
     const curso = datos.cursos.find((curso) => curso.idCurso === id);
     if (curso) {
-        let estado = curso.estado;
-        if (estado === "INACTIVO") {
+        let estado = curso.estado;//recupera el estado del curso
+        if (estado === "INACTIVO") {//segun el estado del curso va a cambiar entre activo/inactivo
             curso.estado = "ACTIVO"
         }
         else {
             curso.estado = "INACTIVO"
         }
-        escribir(datos);
+        escribir(datos);//escribe los nuevos datos en el archivo
         res.json({ message: `${curso.nombre} cambio a ${curso.estado}` });
     }
     else {
-        res.status(500).send("Curso no encontrado.");
+        res.status(500).send("Curso no encontrado.");//si hay un error muestra este msj
     }
 });
 
@@ -127,11 +132,11 @@ app.post('/SubirProfesor', (req, res) => {
     let profesores = datos.profesores;
     const body = req.body;
     //Verifica que el dni no exista
-    const dniExistente = profesores.find(profesor => profesor.dni === body.dni);
+    const dniExistente = profesores.find(profesor => profesor.dni === body.dni);//compara los dni de los profesores ya existentes con el nuevo dni que se quiere ingresar
     if (dniExistente) { //En caso que exista salta este mensaje
         return res.status(400).send({ message: "El DNI ya existe, no se puede crear el profesor." });
     }
-    const nuevoProfesor = {
+    const nuevoProfesor = {//si el dni no existe, se crea el nuevo profesor
         ...body
     };
     datos.profesores.push(nuevoProfesor);
@@ -173,6 +178,7 @@ app.delete('/EstadoProfesor/:dni', (req, res) => {
         res.status(500).send("Profesor no encontrado");
     }
 });
+
 //-------------------MODULOS-----------------------
 //Listar todos los modulos
 app.get('/ListarModulos', (req, res) => {
@@ -205,7 +211,7 @@ app.post('/SubirModulo', (req, res) => {
     const nuevoModulo = {
         idModulo: nuevoModuloId,
         ...body,
-        idCurso: null,
+        idCurso: null, //se crea el modulo sin tener un curso asignado
     };
     datos.modulos.push(nuevoModulo);
     escribir(datos);
@@ -253,12 +259,12 @@ app.post('/AsignarModulo/:moduloId/:cursoId', (req, res) => {
     const cursoId = parseInt(req.params.cursoId);
     //buscar curso
     const curso = datos.cursos.find((curso) => curso.idCurso === cursoId);
-    if (!curso) {
+    if (!curso) { //en caso de no encontrar el curso, se muestra el siguiente mensaje
         return res.status(404).send("curso no encontrado.");
     }
     //buscar modulo
     const modulo = datos.modulos.find((modulo) => modulo.idModulo === moduloId);
-    if (!modulo) {
+    if (!modulo) {//en caso de no encontrar el modulo, se muestra el siguiente mensaje
         return res.status(404).send("Modulo no encontrado.");
     }
     //ver si el modulo ya esta en el curso
@@ -267,7 +273,7 @@ app.post('/AsignarModulo/:moduloId/:cursoId', (req, res) => {
         return res.status(400).send(`El modulo ya esta en el curso de ${curso.nombre}`);
     }
     if (modulo) {
-        modulo.idCurso = cursoId;
+        modulo.idCurso = cursoId; //se le asigna el modulo al curso
     }
     //Actualizar la cantidad de modulos en el curso 
     curso.cantidadModulos += 1;
@@ -275,12 +281,14 @@ app.post('/AsignarModulo/:moduloId/:cursoId', (req, res) => {
     escribir(datos);
     res.json({ message: `${modulo.nombre} añadida correctamente al curso ${curso.nombre}` });
 });
+
 //-------------------ALUMNOS-----------------------
+//Listar todos los alumnos
 app.get('/ListarAlumnos', (req, res) => {
     const datos = leerDatos();
     res.json(datos.alumnos)
 });
-//BUSCAR ALUMNOS POR SU dni
+//Buscar alumno por su DNI
 app.get('/BuscarAlumno/:dni', (req, res) => {
     const datos = leerDatos();
     const dni = parseInt(req.params.dni) // recupera el dni puesto por parametro
@@ -291,13 +299,14 @@ app.get('/BuscarAlumno/:dni', (req, res) => {
         res.status(404).send("Alumno no encontrado.");
     }
 });
-//put
+
+//Actualizar alumno por su DNI
 app.put('/ActualizarAlumno/:dni', (req, res) => {
     const datos = leerDatos();
     const body = req.body;
     const dni = parseInt(req.params.dni)
     const buscarIndex = datos.alumnos.findIndex((alumno) => alumno.dni === dni);
-    if(buscarIndex){
+    if(buscarIndex){//en caso de no encontrar el alumno se muestra el siguiente mensaje
         return (res.status(404).send("Alumno no encontrado."))
     }
     datos.alumnos[buscarIndex] = {
@@ -328,13 +337,13 @@ app.delete('/EstadoAlumno/:dni', (req, res) => {
         res.status(500).send("Alumno no encontrado")
     }
 });
-//LO MISMO PERO POST o sea cargar
+//Subir alumno 
 app.post('/SubirAlumno', (req, res) => {
     const datos = leerDatos();
     let alumnos = datos.alumnos;
     const body = req.body;
     //Verifica que el dni no exista
-    const dniExistente = alumnos.find(alumno => alumno.dni === body.dni);
+    const dniExistente = alumnos.find(alumno => alumno.dni === body.dni);//compara los dni de los alumnos ya existentes con el nuevo dni que se quiere ingresar
     if (dniExistente) { //En caso que exista salta este mensaje
         return res.status(400).send({ message: "El DNI ya existe, no se puede crear el alumno." });
     }
@@ -354,14 +363,14 @@ app.post('/InscribirAlumno/:alumnoDni/:cursoId', (req, res) => {
 
     //buscar el alumno y verificar si esta activo
     const alumno = datos.alumnos.find((alumno) => alumno.dni === alumnoDni);
-    if (!alumno) {
+    if (!alumno) {//en caso de no encontrar el alumno, salta este mensaje
         return res.status(404).send("Alumno no encontrado.");
     }
-    const estado = alumno.estado;
-    if (estado === "INACTIVO") {
+    const estado = alumno.estado; //Recupera el estado (ACTIVO/INACTIVO) del alumno. Para inscribir al alumno, tiene que estar activo
+    if (estado === "INACTIVO") {//en caso de que este inactivo, salta este mensaje
         return res.status(404).send("Alumno INACTIVO.");
     }
-    //Buscar el curso Y VERIFICAR I ESTA ACTIVO
+    //Buscar el curso Y VERIFICA SI ESTA ACTIVO
     const curso = datos.cursos.find((curso) => curso.idCurso === cursoId);
     if (!curso) {
         return res.status(404).send("Curso no encontrado.");
@@ -371,7 +380,7 @@ app.post('/InscribirAlumno/:alumnoDni/:cursoId', (req, res) => {
         return res.status(404).send("Curso INACTIVO.");
     }
     //ver si esta lleno el curso
-    if (curso.cantidadAlumnos >= curso.cantidadTotalAlumnos) {
+    if (curso.cantidadAlumnos >= curso.cantidadTotalAlumnos) { //en caso de que el curso este lleno, salta este mensaje
         return res.status(400).send("No hay cupos disponibles en este curso.");
     }
     //ver si el alumno ya está inscrito en el curso
@@ -382,10 +391,10 @@ app.post('/InscribirAlumno/:alumnoDni/:cursoId', (req, res) => {
 
     //Crear la nueva inscripción
     const nuevaInscripcion = {
-        alumnoDni: alumnoDni,
-        idCurso: cursoId,
+        alumnoDni: alumnoDni, //guarda el dni del alumno
+        idCurso: cursoId, //guarda el id del curso
         estadoInscripcion: "Completa",
-        fechaInscripcion: new Date().toISOString().slice(0, 10),
+        fechaInscripcion: new Date().toISOString().slice(0, 10), //obtenemos la fecha de inscripcion, se usa slice (0,10) para solo obtener la fecha
         pago: "Gratuito",
     };
 
@@ -399,6 +408,7 @@ app.post('/InscribirAlumno/:alumnoDni/:cursoId', (req, res) => {
     escribir(datos);
     res.json({ message: "Alumno inscrito correctamente:", inscripcion: nuevaInscripcion });
 });
+
 //---------------EVALUACIONES-----------------------
 //Listar todas las evaluaciones
 app.get('/ListarEvaluaciones', (req, res) => {
@@ -474,6 +484,7 @@ app.delete('/EstadoEvaluacion/:id', (req, res) => {
         res.status(500).send("Evaluacion no encontrada.");
     }
 });
+
 //Asignar evaluacion a modulo
 app.post('/AsignarEvaluacion/:moduloId/:evaluacionId', (req, res) => {
     const datos = leerDatos();
@@ -503,6 +514,7 @@ app.post('/AsignarEvaluacion/:moduloId/:evaluacionId', (req, res) => {
     escribir(datos);
     res.json({ message: `${evaluacion.tipo} añadida correctamente al modulo ${modulo.nombre}` });
 });
-app.listen(port, () => {
+
+app.listen(port, () => {//Inicia el sv en el puerto (3000)
     console.log(`Servidor escuchando en http://localhost:${port}`);
 });
