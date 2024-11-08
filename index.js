@@ -23,7 +23,7 @@ const escribir = (datos) => {
     }
 };
 app.get('/', (req, res) => {
-    res.send("API COMPLETAMENTE 🍾🍾🍾 ESPUMANTE 🍾🍾🍾PARA UNA DE LAS MEJORES MATERIAS DE TODA LA E.P.E.T N20 - TRABAJO FINAL");
+    res.send("API COMPLETAMENTE 🍾🍾🍾 ESPUMANTE 🍾🍾🍾PARA UNA DE LAS MEJORES MATERIAS DE TODA LA E.P.E.T N20 - API TRABAJO FINAL");
 });
 //-------------------CURSOS-----------------------
 //Listar todos los cursos
@@ -36,7 +36,7 @@ app.get('/ListarCursos', (req, res) => {
 app.get('/BuscarCurso/:id', (req, res) => {
     const datos = leerDatos();
     const id = parseInt(req.params.id);// recupera el id puesto por parametro
-    const curso = datos.cursos.find((curso) => curso.id === id);
+    const curso = datos.cursos.find((curso) => curso.idCurso === id);
     if (curso) {
         res.json(curso);
     } else {
@@ -49,15 +49,15 @@ app.post('/SubirCurso', (req, res) => {
     const datos = leerDatos();
     let cursos = datos.cursos;
     let nuevoCursoId;
-    if ( cursos.length > 0){
-        nuevoCursoId = cursos[cursos.length - 1].id + 1;
+    if (cursos.length > 0) {
+        nuevoCursoId = cursos[cursos.length - 1].idCurso + 1;
     }
-    else{
+    else {
         nuevoCursoId = 1;
     }
     const body = req.body;
     const nuevoCurso = {
-        id: nuevoCursoId,
+        idCurso: nuevoCursoId,
         ...body,
         cantidadAlumnos: 0,
         cantidadModulos: 0,
@@ -72,7 +72,7 @@ app.put('/ActualizarCurso/:id', (req, res) => {
     const datos = leerDatos();
     const body = req.body;
     const id = parseInt(req.params.id);// recupera el id puesto por parametro
-    const buscarIndex = datos.cursos.findIndex((curso) => curso.id === id);
+    const buscarIndex = datos.cursos.findIndex((curso) => curso.idCurso === id);
     datos.cursos[buscarIndex] = {
         ...datos.cursos[buscarIndex],
         ...body,
@@ -81,11 +81,11 @@ app.put('/ActualizarCurso/:id', (req, res) => {
     res.json({ message: "Curso actualizado" });
 });
 
-//Eliminar curso
+//Cambiar estado del curso
 app.delete('/EstadoCurso/:id', (req, res) => {
     const datos = leerDatos();
     const id = parseInt(req.params.id);
-    const curso = datos.cursos.find((curso) => curso.id === id);
+    const curso = datos.cursos.find((curso) => curso.idCurso === id);
     if (curso) {
         let estado = curso.estado;
         if (estado === "INACTIVO") {
@@ -109,11 +109,11 @@ app.get('/ListarProfesores', (req, res) => {
     res.json(datos.profesores);
 });
 
-//Buscar profesor por ID
-app.get('/BuscarProfesor/:id', (req, res) => {
+//Buscar profesor por DNI
+app.get('/BuscarProfesor/:dni', (req, res) => {
     const datos = leerDatos();
-    const id = parseInt(req.params.id);// recupera el id puesto por parametro
-    const profesor = datos.profesores.find((profesor) => profesor.id === id);
+    const dni = parseInt(req.params.dni);// recupera el dni puesto por parametro
+    const profesor = datos.profesores.find((profesor) => profesor.dni === dni);
     if (profesor) {
         res.json(profesor);
     } else {
@@ -125,16 +125,13 @@ app.get('/BuscarProfesor/:id', (req, res) => {
 app.post('/SubirProfesor', (req, res) => {
     const datos = leerDatos();
     let profesores = datos.profesores;
-    let nuevoProfesorId;
-    if ( profesores.length > 0){
-        nuevoProfesorId = profesores[profesores.length - 1].id + 1;
-    }
-    else{
-        nuevoProfesorId = 1;
-    }
     const body = req.body;
+    //Verifica que el dni no exista
+    const dniExistente = profesores.find(profesor => profesor.dni === body.dni);
+    if (dniExistente) { //En caso que exista salta este mensaje
+        return res.status(400).send({ message: "El DNI ya existe, no se puede crear el profesor." });
+    }
     const nuevoProfesor = {
-        id: nuevoProfesorId,
         ...body
     };
     datos.profesores.push(nuevoProfesor);
@@ -143,11 +140,11 @@ app.post('/SubirProfesor', (req, res) => {
 });
 
 //Actualizar profesor
-app.put('/ActualizarProfesor/:id', (req, res) => {
+app.put('/ActualizarProfesor/:dni', (req, res) => {
     const datos = leerDatos();
     const body = req.body;
-    const id = parseInt(req.params.id);
-    const buscarIndex = datos.profesores.findIndex((profesor) => profesor.id === id);
+    const dni = parseInt(req.params.dni);
+    const buscarIndex = datos.profesores.findIndex((profesor) => profesor.dni === dni);
     datos.profesores[buscarIndex] = {
         ...datos.profesores[buscarIndex],
         ...body,
@@ -156,11 +153,11 @@ app.put('/ActualizarProfesor/:id', (req, res) => {
     res.json({ message: "Profesor actualizado" });
 });
 
-//Eliminar profesor
-app.delete('/EstadoProfesor/:id', (req, res) => {
+//Cambiar estado del profesor
+app.delete('/EstadoProfesor/:dni', (req, res) => {
     const datos = leerDatos();
-    const id = parseInt(req.params.id);
-    const profesor = datos.profesores.find((profesor) => profesor.id === id);
+    const dni = parseInt(req.params.dni);
+    const profesor = datos.profesores.find((profesor) => profesor.dni === dni);
     if (profesor) {
         let estado = profesor.estado;
         if (estado === "INACTIVO") {
@@ -186,7 +183,7 @@ app.get('/ListarModulos', (req, res) => {
 app.get('/BuscarModulo/:id', (req, res) => {
     const datos = leerDatos();
     const id = parseInt(req.params.id);// recupera el id puesto por parametro
-    const modulo = datos.modulos.find((modulo) => modulo.id === id);
+    const modulo = datos.modulos.find((modulo) => modulo.idModulo === id);
     if (modulo) {
         res.json(modulo);
     } else {
@@ -198,17 +195,17 @@ app.post('/SubirModulo', (req, res) => {
     const datos = leerDatos();
     let modulos = datos.modulos;
     let nuevoModuloId;
-    if ( modulos.length > 0){
-        nuevoModuloId = modulos[modulos.length - 1].id + 1;
+    if (modulos.length > 0) {
+        nuevoModuloId = modulos[modulos.length - 1].idModulo + 1;
     }
-    else{
+    else {
         nuevoModuloId = 1;
     }
     const body = req.body;
     const nuevoModulo = {
-        id: nuevoModuloId,
+        idModulo: nuevoModuloId,
         ...body,
-        cursoId:null,
+        idCurso: null,
     };
     datos.modulos.push(nuevoModulo);
     escribir(datos);
@@ -220,7 +217,7 @@ app.put('/ActualizarModulo/:id', (req, res) => {
     const datos = leerDatos();
     const body = req.body;
     const id = parseInt(req.params.id);// recupera el id puesto por parametro
-    const buscarIndex = datos.modulos.findIndex((modulo) => modulo.id === id);
+    const buscarIndex = datos.modulos.findIndex((modulo) => modulo.idModulo === id);
     datos.modulos[buscarIndex] = {
         ...datos.modulos[buscarIndex],
         ...body,
@@ -229,11 +226,11 @@ app.put('/ActualizarModulo/:id', (req, res) => {
     res.json({ message: "Modulo actualizado" });
 });
 
-//Eliminar modulo
+//Cambiar estado del modulo
 app.delete('/EstadoModulo/:id', (req, res) => {
     const datos = leerDatos();
     const id = parseInt(req.params.id);
-    const modulo = datos.modulos.find((modulo) => modulo.id === id);
+    const modulo = datos.modulos.find((modulo) => modulo.idModulo === id);
     if (modulo) {
         let estado = modulo.estado;
         if (estado === "INACTIVO") {
@@ -255,39 +252,39 @@ app.post('/AsignarModulo/:moduloId/:cursoId', (req, res) => {
     const moduloId = parseInt(req.params.moduloId);
     const cursoId = parseInt(req.params.cursoId);
     //buscar curso
-    const curso = datos.cursos.find((curso) => curso.id === cursoId);
+    const curso = datos.cursos.find((curso) => curso.idCurso === cursoId);
     if (!curso) {
         return res.status(404).send("curso no encontrado.");
     }
     //buscar modulo
-    const modulo = datos.modulos.find((modulo) => modulo.id === moduloId);
+    const modulo = datos.modulos.find((modulo) => modulo.idModulo === moduloId);
     if (!modulo) {
         return res.status(404).send("Modulo no encontrado.");
     }
     //ver si el modulo ya esta en el curso
-    const verificarModulo = datos.modulos.find((modulo) => modulo.cursoId === cursoId);
+    const verificarModulo = datos.modulos.find((modulo) => modulo.idCurso === cursoId);
     if (verificarModulo) {
         return res.status(400).send(`El modulo ya esta en el curso de ${curso.nombre}`);
     }
-    if(modulo){
-        modulo.cursoId = cursoId;
+    if (modulo) {
+        modulo.idCurso = cursoId;
     }
     //Actualizar la cantidad de modulos en el curso 
     curso.cantidadModulos += 1;
 
     escribir(datos);
-    res.json({ message: `${modulo.nombre} añadida correctamente al curso ${curso.nombre}`});
+    res.json({ message: `${modulo.nombre} añadida correctamente al curso ${curso.nombre}` });
 });
 //-------------------ALUMNOS-----------------------
 app.get('/ListarAlumnos', (req, res) => {
     const datos = leerDatos();
     res.json(datos.alumnos)
 });
-//BUSCAR ALUMNOS POR SU ID
-app.get('/BuscarAlumno/:id', (req, res) => {
+//BUSCAR ALUMNOS POR SU dni
+app.get('/BuscarAlumno/:dni', (req, res) => {
     const datos = leerDatos();
-    const id = parseInt(req.params.id) // recupera el id puesto por parametro
-    const alumno = datos.alumnos.find((alumno) => alumno.id === id);
+    const dni = parseInt(req.params.dni) // recupera el dni puesto por parametro
+    const alumno = datos.alumnos.find((alumno) => alumno.dni === dni);
     if (alumno) {
         res.json(alumno)
     } else {
@@ -295,11 +292,14 @@ app.get('/BuscarAlumno/:id', (req, res) => {
     }
 });
 //put
-app.put('/ActualizarAlumno/:id', (req, res) => {
+app.put('/ActualizarAlumno/:dni', (req, res) => {
     const datos = leerDatos();
     const body = req.body;
-    const id = parseInt(req.params.id)
-    const buscarIndex = datos.alumnos.findIndex((alumno) => alumno.id === id);
+    const dni = parseInt(req.params.dni)
+    const buscarIndex = datos.alumnos.findIndex((alumno) => alumno.dni === dni);
+    if(buscarIndex){
+        return (res.status(404).send("Alumno no encontrado."))
+    }
     datos.alumnos[buscarIndex] = {
         ...datos.alumnos[buscarIndex],
         ...body,
@@ -307,11 +307,12 @@ app.put('/ActualizarAlumno/:id', (req, res) => {
     escribir(datos);
     res.json({ message: "Alumno/a Actualizado" })
 });
-//eliminar
-app.delete('/EstadoAlumno/:id', (req, res) => {
+
+//Cambiar estado del alumno
+app.delete('/EstadoAlumno/:dni', (req, res) => {
     const datos = leerDatos();
-    const id = parseInt(req.params.id)
-    const alumno = datos.alumnos.find((alumno) => alumno.id === id);
+    const dni = parseInt(req.params.dni)
+    const alumno = datos.alumnos.find((alumno) => alumno.dni === dni);
     if (alumno) {
         let estado = alumno.estado;
         if (estado === "INACTIVO") {
@@ -331,30 +332,28 @@ app.delete('/EstadoAlumno/:id', (req, res) => {
 app.post('/SubirAlumno', (req, res) => {
     const datos = leerDatos();
     let alumnos = datos.alumnos;
-    let nuevoAlumnoId;
-    if ( alumnos.length > 0){
-        nuevoAlumnoId = alumnos[alumnos.length - 1].id + 1;
-    }
-    else{
-        nuevoAlumnoId = 1;
-    }
     const body = req.body;
+    //Verifica que el dni no exista
+    const dniExistente = alumnos.find(alumno => alumno.dni === body.dni);
+    if (dniExistente) { //En caso que exista salta este mensaje
+        return res.status(400).send({ message: "El DNI ya existe, no se puede crear el alumno." });
+    }
     const nuevoAlumno = {
-        id: nuevoAlumnoId, 
         ...body,
     };
     datos.alumnos.push(nuevoAlumno);
     escribir(datos);
     res.json(nuevoAlumno)
 });
+
 //Inscribir alumno en un curso
-app.post('/InscribirAlumno/:alumnoId/:cursoId', (req, res) => {
+app.post('/InscribirAlumno/:alumnoDni/:cursoId', (req, res) => {
     const datos = leerDatos();
-    const alumnoId = parseInt(req.params.alumnoId);
+    const alumnoDni = parseInt(req.params.alumnoDni);
     const cursoId = parseInt(req.params.cursoId);
 
     //buscar el alumno y verificar si esta activo
-    const alumno = datos.alumnos.find((alumno) => alumno.id === alumnoId);
+    const alumno = datos.alumnos.find((alumno) => alumno.dni === alumnoDni);
     if (!alumno) {
         return res.status(404).send("Alumno no encontrado.");
     }
@@ -363,7 +362,7 @@ app.post('/InscribirAlumno/:alumnoId/:cursoId', (req, res) => {
         return res.status(404).send("Alumno INACTIVO.");
     }
     //Buscar el curso Y VERIFICAR I ESTA ACTIVO
-    const curso = datos.cursos.find((curso) => curso.id === cursoId);
+    const curso = datos.cursos.find((curso) => curso.idCurso === cursoId);
     if (!curso) {
         return res.status(404).send("Curso no encontrado.");
     }
@@ -376,15 +375,15 @@ app.post('/InscribirAlumno/:alumnoId/:cursoId', (req, res) => {
         return res.status(400).send("No hay cupos disponibles en este curso.");
     }
     //ver si el alumno ya está inscrito en el curso
-    const inscripcionVerificar = datos.inscripciones.find((inscripcion) => inscripcion.alumnoId === alumnoId && inscripcion.cursoId === cursoId);
+    const inscripcionVerificar = datos.inscripciones.find((inscripcion) => inscripcion.alumnoDni === alumnoDni && inscripcion.idCurso === cursoId);
     if (inscripcionVerificar) {
         return res.status(400).send("El alumno ya está inscrito en este curso.");
     }
 
     //Crear la nueva inscripción
     const nuevaInscripcion = {
-        alumnoId: alumnoId,
-        cursoId: cursoId,
+        alumnoDni: alumnoDni,
+        idCurso: cursoId,
         estadoInscripcion: "Completa",
         fechaInscripcion: new Date().toISOString().slice(0, 10),
         pago: "Gratuito",
@@ -411,7 +410,7 @@ app.get('/ListarEvaluaciones', (req, res) => {
 app.get('/BuscarEvaluacion/:id', (req, res) => {
     const datos = leerDatos();
     const id = parseInt(req.params.id);// recupera el id puesto por parametro
-    const evaluacion = datos.evaluaciones.find((evaluacion) => evaluacion.id === id);
+    const evaluacion = datos.evaluaciones.find((evaluacion) => evaluacion.idEvaluacion === id);
     if (evaluacion) {
         res.json(evaluacion);
     } else {
@@ -424,17 +423,17 @@ app.post('/SubirEvaluacion', (req, res) => {
     const datos = leerDatos();
     let evaluaciones = datos.evaluaciones;
     let nuevaEvaluacionId;
-    if ( evaluaciones.length > 0){
-        nuevaEvaluacionId = evaluaciones[evaluaciones.length - 1].id + 1;
+    if (evaluaciones.length > 0) {
+        nuevaEvaluacionId = evaluaciones[evaluaciones.length - 1].idEvaluacion + 1;
     }
-    else{
+    else {
         nuevaEvaluacionId = 1;
     }
     const body = req.body;
     const nuevaEvaluacion = {
-        id: nuevaEvaluacionId,
+        idEvaluacion: nuevaEvaluacionId,
         ...body,
-        moduloId: null,
+        idModulo: null,
     };
     datos.evaluaciones.push(nuevaEvaluacion);
     escribir(datos);
@@ -446,7 +445,7 @@ app.put('/ActualizarEvaluacion/:id', (req, res) => {
     const datos = leerDatos();
     const body = req.body;
     const id = parseInt(req.params.id);// recupera el id puesto por parametro
-    const buscarIndex = datos.evaluaciones.findIndex((evaluacion) => evaluacion.id === id);
+    const buscarIndex = datos.evaluaciones.findIndex((evaluacion) => evaluacion.idEvaluacion === id);
     datos.evaluaciones[buscarIndex] = {
         ...datos.evaluaciones[buscarIndex],
         ...body,
@@ -455,11 +454,11 @@ app.put('/ActualizarEvaluacion/:id', (req, res) => {
     res.json({ message: "Evaluacion actualizada" });
 });
 
-//Eliminar evaluacion
+//Cambiar estado de evaluacion
 app.delete('/EstadoEvaluacion/:id', (req, res) => {
     const datos = leerDatos();
     const id = parseInt(req.params.id);
-    const evaluacion = datos.evaluaciones.find((evaluacion) => evaluacion.id === id);
+    const evaluacion = datos.evaluaciones.find((evaluacion) => evaluacion.idEvaluacion === id);
     if (evaluacion) {
         let estado = evaluacion.estado;
         if (estado === "INACTIVO") {
@@ -472,37 +471,37 @@ app.delete('/EstadoEvaluacion/:id', (req, res) => {
         res.json({ message: `La evaluacion de ${evaluacion.tipo} cambio a ${evaluacion.estado}` });
     }
     else {
-        res.status(500).send("Curso no encontrado.");
+        res.status(500).send("Evaluacion no encontrada.");
     }
 });
-//Asignar evaluacion a curso
+//Asignar evaluacion a modulo
 app.post('/AsignarEvaluacion/:moduloId/:evaluacionId', (req, res) => {
     const datos = leerDatos();
     const moduloId = parseInt(req.params.moduloId);
     const evaluacionId = parseInt(req.params.evaluacionId);
     //buscar evaluacion
-    const evaluacion = datos.evaluaciones.find((evaluacion) => evaluacion.id === evaluacionId);
+    const evaluacion = datos.evaluaciones.find((evaluacion) => evaluacion.idEvaluacion === evaluacionId);
     if (!evaluacion) {
         return res.status(404).send("Evaluacion no encontrada.");
     }
     //buscar modulo
-    const modulo = datos.modulos.find((modulo) => modulo.id === moduloId);
+    const modulo = datos.modulos.find((modulo) => modulo.idModulo === moduloId);
     if (!modulo) {
         return res.status(404).send("Modulo no encontrado.");
     }
     //ver si la evaluacion ya esta en el modulo
-    const verificarEvaluacion = datos.evaluaciones.find(() => evaluacion.moduloId === moduloId);
+    const verificarEvaluacion = datos.evaluaciones.find(() => evaluacion.idModulo === moduloId);
     if (verificarEvaluacion) {
         return res.status(400).send(`La evaluacion ya esta en el modulo de ${modulo.nombre}`);
     }
-    if(evaluacion){
-        evaluacion.moduloId = moduloId
+    if (evaluacion) {
+        evaluacion.idModulo = moduloId
     }
     //Actualizar la cantidad de evaluaciones en el modulo 
     modulo.cantidadEvaluaciones += 1;
 
     escribir(datos);
-    res.json({ message: `${evaluacion.tipo} añadida correctamente al modulo ${modulo.nombre}`});
+    res.json({ message: `${evaluacion.tipo} añadida correctamente al modulo ${modulo.nombre}` });
 });
 app.listen(port, () => {
     console.log(`Servidor escuchando en http://localhost:${port}`);
