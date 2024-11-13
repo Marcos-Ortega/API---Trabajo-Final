@@ -7,21 +7,21 @@
             "telefono": "2993853473",
             "email": "Guada.torrico@gmail.com",
             "contraseña": "password123",
-            "cursoInscripto": 2,
+            "cursoInscripto": 1,
             "fechaNacimiento": "2000-01-01",
             "estado": "ACTIVO"
         }
     ],
     "profesores": [
         {
-            "dni": 46795135,
+            "dni": 11223354,
             "nombre": "Marcos",
             "apellido": "Ortega",
             "telefono": "2995822312",
             "email": "marquitos.ortg@gmail.com",
             "contraseña": "profesor123",
             "especializacion": "Programacion",
-            "cursoAsignado": 2,
+            "cursoAsignado": 1,
             "estado": "ACTIVO"
         }
     ],
