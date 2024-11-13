@@ -14,14 +14,14 @@
     ],
     "profesores": [
         {
-            "dni": 11223354,
+            "dni": 46795135,
             "nombre": "Marcos",
             "apellido": "Ortega",
             "telefono": "2995822312",
             "email": "marquitos.ortg@gmail.com",
             "contraseña": "profesor123",
             "especializacion": "Programacion",
-            "cursoAsignado": 1,
+            "cursoAsignado": 2,
             "estado": "ACTIVO"
         }
     ],
@@ -36,7 +36,8 @@
             "cantidadTotalAlumnos": 35,
             "estado": "ACTIVO",
             "cantidadAlumnos": 2,
-            "cantidadModulos": 1
+            "cantidadModulos": 1,
+            "profesor": 46795135
         }
     ],
     "modulos": [

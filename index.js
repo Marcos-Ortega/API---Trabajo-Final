@@ -355,6 +355,37 @@ app.post('/SubirAlumno', (req, res) => {
     res.json(nuevoAlumno)
 });
 
+//-----------------INSCRIPCIONES--------------
+//Listar todas las inscripciones
+app.get('/Inscripciones', (req, res) => {
+    const datos = leerDatos();
+    res.json(datos.inscripciones)
+});
+
+//Listar incripciones por alumno (con su dni)
+app.get('/BuscarInscripcionesAlumno/:dni', (req, res) => {
+    const datos = leerDatos();
+    const dni = parseInt(req.params.dni) // recupera el dni puesto por parametro
+    const inscripcion = datos.inscripciones.filter((inscripcion) => inscripcion.alumnoDni === dni);//usamos filter para que busque mas de un resultado
+    if (inscripcion) {
+        res.json(inscripcion)
+    } else {
+        res.status(404).send("Inscripciones no encontrado.");
+    }
+});
+
+//Listar incripciones por curso (con su id)
+app.get('/BuscarInscripcionesCurso/:id', (req, res) => {
+    const datos = leerDatos();
+    const id = parseInt(req.params.id) // recupera el dni puesto por parametro
+    const inscripcion = datos.inscripciones.filter((inscripcion) => inscripcion.idCurso === id); //usamos filter para que busque mas de un resultado
+    if (inscripcion) {
+        res.json(inscripcion)
+    } else {
+        res.status(404).send("Inscripciones no encontrado.");
+    }
+});
+
 //Inscribir alumno en un curso
 app.post('/InscribirAlumno/:alumnoDni/:cursoId', (req, res) => {
     const datos = leerDatos();
